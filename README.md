@@ -63,7 +63,7 @@ ecommerce-api/
 ├── README.md
 ├── SECURITY_REVIEW.md
 └── Web_Security_Testing_Report.docx
-
+```
 🚀 Getting Started
 1. Prerequisites
 Node.js (v18 or higher recommended)
@@ -76,7 +76,7 @@ Neon PostgreSQL account/database instance
 Clone the repository and install the project dependencies:
 
 Bash
-git clone <YOUR_REPOSITORY_URL>
+git clone https://github.com/issa-oweimer/E-commerce-REST-API
 cd ecommerce-api
 npm install
 3. Environment Variables Setup
