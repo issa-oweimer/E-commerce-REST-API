@@ -1,18 +1,16 @@
 const express = require("express");
-const {
-  getCategories,
-  getCategoryById,
-  createCategory,
-  updateCategory,
-  deleteCategory
-} = require("../controllers/categoriesController");
-
 const router = express.Router();
+const categoriesController = require("../controllers/categoriesController");
+const authenticate = require("../middleware/authenticate");
+const { authorizeRoles } = require("../middleware/authorize");
+const validate = require("../middleware/validate");
+const { idParamValidator } = require("../validators/schemaValidators");
 
-router.get("/", getCategories);
-router.get("/:id", getCategoryById);
-router.post("/", createCategory);
-router.put("/:id", updateCategory);
-router.delete('/:id', deleteCategory);
+router.get("/", categoriesController.getCategories);
+router.get("/:id", idParamValidator, validate, categoriesController.getCategoryById);
+
+router.post("/", authenticate,  authorizeRoles("admin"), categoriesController.createCategory);
+router.put("/:id", authenticate, authorizeRoles("admin"), idParamValidator, validate, categoriesController.updateCategory);
+router.delete("/:id", authenticate, authorizeRoles("admin"), idParamValidator, validate, categoriesController.deleteCategory);
 
 module.exports = router;

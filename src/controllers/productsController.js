@@ -33,28 +33,15 @@ async function getProductById(req, res, next) {
   }
 }
 
-// 3. إضافة منتج جديد
+// 3. إضافة منتج جديد (Admin)
 async function createProduct(req, res, next) {
   try {
     const { category_id, name, description, price, stock_quantity = 0, sku } = req.body;
 
-    if (!category_id || !name || price === undefined || !sku) {
-      return res.status(400).json({
-        success: false,
-        message: "category_id, name, price, and sku are required",
-      });
-    }
-
-    if (Number(price) <= 0 || Number(stock_quantity) < 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Price must be positive and stock cannot be negative",
-      });
-    }
-
     const result = await pool.query(
-      `INSERT INTO products (category_id, name, description, price, stock_quantity, sku)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      `INSERT INTO products (category_id, name, description, price, quantity_stock, sku)
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING id, category_id, name, description, price, quantity_stock, sku, is_active, created_at`,
       [category_id, name, description || null, price, stock_quantity, sku]
     );
 
@@ -71,20 +58,17 @@ async function createProduct(req, res, next) {
   }
 }
 
-// 4. تعديل منتج كامل
+// 4. تعديل منتج كامل (Admin)
 async function updateProduct(req, res, next) {
   try {
     const productId = Number(req.params.id);
     const { category_id, name, description, price, stock_quantity, sku, is_active } = req.body;
 
-    if (!Number.isInteger(productId) || productId <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid product ID" });
-    }
-
     const result = await pool.query(
       `UPDATE products 
-       SET category_id = $1, name = $2, description = $3, price = $4, stock_quantity = $5, sku = $6, is_active = $7, updated_at = NOW()
-       WHERE id = $8 RETURNING *`,
+       SET category_id = $1, name = $2, description = $3, price = $4, quantity_stock = $5, sku = $6, is_active = $7, updated_at = NOW()
+       WHERE id = $8 
+       RETURNING id, category_id, name, description, price, quantity_stock, sku, is_active, updated_at`,
       [category_id, name, description, price, stock_quantity, sku, is_active, productId]
     );
 
@@ -109,12 +93,9 @@ async function updateProduct(req, res, next) {
 async function deactivateProduct(req, res, next) {
   try {
     const productId = Number(req.params.id);
-    if (!Number.isInteger(productId) || productId <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid product ID" });
-    }
 
     const result = await pool.query(
-      "UPDATE products SET is_active = false, updated_at = NOW() WHERE id = $1 RETURNING *",
+      "UPDATE products SET is_active = false, updated_at = NOW() WHERE id = $1 RETURNING id, name, is_active",
       [productId]
     );
 
